@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HORSE RUSH</title>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--o:#ff7a00;--y:#ffc928;--d:#c24a00;--br:#1f0d04;--br2:#4a1d05;--ink:#fff4e0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+*,*:before,*:after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(ellipse at 50% 0%,#a33a05 0%,var(--br2) 45%,var(--br) 100%) fixed;color:var(--ink);font-family:'Outfit',system-ui,sans-serif;overflow-x:hidden}
+#app{min-height:100%;display:flex;align-items:center;justify-content:center;padding:14px}
+.screen{display:none;width:100%;max-width:980px;text-align:center;flex-direction:column;align-items:center;gap:16px}
+.screen.on{display:flex}
+h1,h2,.num{font-family:'Bungee','Impact',sans-serif;font-weight:400;margin:0}
+h1{font-size:clamp(2.6rem,10vw,5.6rem);line-height:1;letter-spacing:.02em;color:var(--y);text-shadow:0 4px 0 var(--d),0 0 28px rgba(255,201,40,.7)}
+h2{font-size:clamp(1.5rem,5vw,2.4rem);color:var(--y);text-shadow:0 3px 0 var(--d)}
+.tag{margin:0;opacity:.85;font-size:1.1rem}
+.btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{font:800 1.1rem 'Outfit',sans-serif;border:0;border-radius:999px;padding:14px 34px;cursor:pointer;color:#2a1000;background:linear-gradient(#ffd84a,var(--o));box-shadow:0 5px 0 var(--d),0 0 18px rgba(255,160,0,.45);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--d)}
+.btn:focus-visible,.card:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.btn.ghost{background:rgba(255,255,255,.08);color:var(--ink);box-shadow:inset 0 0 0 2px var(--o)}
+.btn.sm{padding:10px 20px;font-size:.95rem}
+.btn:disabled{filter:grayscale(.8) brightness(.7);cursor:not-allowed;transform:none}
+.btn.boost.ready{animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 5px 0 var(--d),0 0 34px 6px rgba(255,220,60,.9)}}
+#logo{width:min(46vw,210px);height:auto;filter:drop-shadow(0 0 22px rgba(255,170,0,.6))}
+#cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;width:100%}
+.card{background:linear-gradient(#5a2606,#2e1204);border:2px solid #7a3a10;border-radius:18px;padding:10px;color:var(--ink);font:inherit;cursor:pointer;transition:transform .15s}
+.card:hover{transform:translateY(-3px)}
+.card.sel{border-color:var(--y);box-shadow:0 0 22px rgba(255,201,40,.7);background:linear-gradient(#7a3508,#3c1805)}
+.card canvas{width:100%;height:auto;display:block}
+.card b{display:block;font-family:'Bungee',sans-serif;font-weight:400;margin:4px 0}
+.bar{height:7px;border-radius:9px;background:#0004;margin:5px 0;overflow:hidden;text-align:left}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--o),var(--y));border-radius:9px}
+.card small{opacity:.75;font-size:.72rem;display:flex;justify-content:space-between}
+#hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+#hud div{background:rgba(0,0,0,.4);border:1px solid #ff7a0066;border-radius:14px;padding:6px 8px}
+#hud span{font-size:.72rem;opacity:.75;display:block}
+#hud b{font-family:'Bungee',sans-serif;font-weight:400;color:var(--y);font-size:clamp(1rem,3.6vw,1.5rem)}
+#bbar{height:10px;border-radius:9px;background:#0006;margin-top:8px;overflow:hidden}
+#bfill{height:100%;width:100%;background:linear-gradient(90deg,var(--o),var(--y));transition:width .1s}
+#stage{position:relative;width:100%;border-radius:18px;overflow:hidden;box-shadow:0 0 0 3px var(--o),0 0 34px rgba(255,140,0,.5)}
+#cv{width:100%;height:auto;display:block;background:#222}
+#count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bungee',sans-serif;font-size:clamp(4rem,22vw,9rem);color:var(--y);text-shadow:0 6px 0 var(--d),0 0 40px #ff9a00;pointer-events:none}
+#count.pop{animation:pop .8s ease-out}
+@keyframes pop{0%{transform:scale(2.2);opacity:0}25%{opacity:1}100%{transform:scale(.9);opacity:.9}}
+#rlist{list-style:none;margin:0;padding:0;width:min(100%,460px);display:grid;gap:8px;text-align:left}
+#rlist li{display:flex;gap:12px;align-items:center;background:rgba(0,0,0,.35);border-radius:14px;padding:9px 14px;border:2px solid transparent}
+#rlist li.me{border-color:var(--y);background:rgba(255,160,0,.22)}
+#rlist .num{width:2.2rem;color:var(--y)}
+#rlist .t{margin-left:auto;font-variant-numeric:tabular-nums;opacity:.85}
+#rlist .dot{width:16px;height:16px;border-radius:50%}
+#modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:5;padding:14px}
+#modal.on{display:flex}
+.box{background:linear-gradient(#5a2606,#2a1003);border:3px solid var(--o);border-radius:22px;padding:24px;width:min(100%,380px);text-align:center;display:grid;gap:14px}
+.seg{display:flex;gap:6px;justify-content:center}
+.seg button{flex:1;font:800 .95rem 'Outfit',sans-serif;padding:10px;border-radius:12px;border:2px solid var(--o);background:transparent;color:var(--ink);cursor:pointer}
+.seg button.on{background:var(--o);color:#2a1000}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
+@media (max-width:560px){#hud{grid-template-columns:1fr 1fr}.btn{padding:12px 22px}}
+@media (prefers-reduced-motion:reduce){.btn.boost.ready,#count.pop{animation:none}}
+</style>
+</head>
+<body>
+<main id="app">
+  <section id="menu" class="screen on">
+    <canvas id="logo" width="240" height="240" aria-label="Horse logo"></canvas>
+    <h1>HORSE RUSH</h1>
+    <p class="tag">Pick a horse, time your boost, cross the line first.</p>
+    <div class="btns"><button class="btn" id="play">Play</button><button class="btn ghost" id="setb">Settings</button></div>
+  </section>
+
+  <section id="select" class="screen">
+    <h2>Choose your horse</h2>
+    <div id="cards"></div>
+    <div class="btns"><button class="btn ghost" id="back1">Back</button><button class="btn" id="go">Go to the track</button></div>
+  </section>
+
+  <section id="game" class="screen">
+    <div id="hud">
+      <div><span>Position</span><b id="hpos">1/6</b></div>
+      <div><span>Remaining</span><b id="hrem">600 m</b></div>
+      <div><span>Time</span><b id="htime">0.0 s</b></div>
+      <div><span id="blabel">Boost ready</span><div id="bbar"><div id="bfill"></div></div></div>
+    </div>
+    <div id="stage"><canvas id="cv" width="960" height="520"></canvas><div id="count"></div></div>
+    <div class="btns">
+      <button class="btn" id="start">Start race</button>
+      <button class="btn boost" id="boost" disabled>Boost (Space)</button>
+      <button class="btn ghost sm" id="mute">Sound on</button>
+      <button class="btn ghost sm" id="quit">Quit</button>
+    </div>
+  </section>
+
+  <section id="results" class="screen">
+    <h2 id="rtitle">Results</h2>
+    <p class="tag" id="rsub"></p>
+    <ol id="rlist"></ol>
+    <div class="btns"><button class="btn" id="again">Play again</button><button class="btn ghost" id="change">Change horse</button><button class="btn ghost" id="tomenu">Menu</button></div>
+  </section>
+</main>
+
+<div id="modal"><div class="box">
+  <h2>Settings</h2>
+  <div>Difficulty</div>
+  <div class="seg" id="seg"><button data-d="easy">Easy</button><button data-d="normal">Normal</button><button data-d="hard">Hard</button></div>
+  <button class="btn ghost sm" id="mute2">Sound on</button>
+  <button class="btn" id="close">Close</button>
+</div></div>
+<canvas id="fx"></canvas>
+
+<script>
+/* ===== Data ===== */
+const W=960,H=520,LEN=600,SX=80,FX=W-90,LT=150,LH=(H-LT-16)/6;
+const HS=[
+ {n:'Blaze', c:'#ff7a00',d:'#8f3800',silk:'#ffffff',s:20.0,b:.7},
+ {n:'Goldie',c:'#f2b705',d:'#8a5c00',silk:'#e11d48',s:19.7,b:.95},
+ {n:'Ember', c:'#b5301a',d:'#5a1008',silk:'#22d3ee',s:20.3,b:.45},
+ {n:'Storm', c:'#8d9bb8',d:'#3a455c',silk:'#a3e635',s:19.5,b:1},
+ {n:'Mocha', c:'#8a5530',d:'#3d2210',silk:'#f472b6',s:19.9,b:.8},
+ {n:'Shadow',c:'#41302b',d:'#120a08',silk:'#fde047',s:20.15,b:.6}
+];
+const DM={easy:.93,normal:1,hard:1.05};
+const $=id=>document.getElementById(id);
+const cv=$('cv'),g=cv.getContext('2d'),fx=$('fx'),fg=fx.getContext('2d');
+
+/* ===== State ===== */
+let sel=0,diff='normal',muted=false,state='idle',screen='menu',horses=[],T=0,off=0,bt=0,cd=0,endT=0,run=0,ptc=[],conf=[],ac,gal=0,last=performance.now();
+try{const s=JSON.parse(localStorage.getItem('horserush')||'{}');diff=s.diff||diff;muted=!!s.muted;sel=s.sel||0}catch(e){}
+function save(){try{localStorage.setItem('horserush',JSON.stringify({diff,muted,sel}))}catch(e){}}
+
+/* ===== Sound ===== */
+function tone(f,d=.15,type='square',v=.06,delay=0,f2){
+  if(muted)return;
+  try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(),a=ac.createGain(),t=ac.currentTime+delay;
+    o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+    a.gain.setValueAtTime(v,t);a.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(a);a.connect(ac.destination);o.start(t);o.stop(t+d)}catch(e){}
+}
+function syncMute(){$('mute').textContent=$('mute2').textContent=muted?'Sound off':'Sound on';save()}
+
+/* ===== Horse drawing ===== */
+function drawHorse(c,x,y,s,h,t,num,sh){
+  c.save();c.translate(x,y);c.scale(s,s);
+  const bob=-Math.abs(Math.sin(t))*3;
+  const leg=(hx,ph,col)=>{
+    const a=Math.sin(t+ph)*.95,kx=hx+Math.sin(a)*15,ky=-26+Math.cos(a)*15;
+    const b=a-.6-.5*Math.cos(t+ph);let fx2=kx+Math.sin(b)*15,fy=Math.min(0,ky+Math.cos(b)*15);
+    c.strokeStyle=col;c.lineWidth=5;c.lineCap='round';c.lineJoin='round';
+    c.beginPath();c.moveTo(hx,-26+bob);c.lineTo(kx,ky);c.lineTo(fx2,fy);c.stroke();
+    c.fillStyle=h.d;c.beginPath();c.arc(fx2,fy,3.4,0,7);c.fill();
+  };
+  leg(-20,Math.PI,h.d);leg(18,Math.PI+1.2,h.d);
+  c.strokeStyle=h.d;c.lineWidth=7;c.lineCap='round';
+  c.beginPath();c.moveTo(-28,-42+bob);c.quadraticCurveTo(-48,-46+Math.sin(t)*7,-54,-24+Math.sin(t+1)*9);c.stroke();
+  c.translate(0,bob);
+  c.fillStyle=h.c;c.beginPath();c.ellipse(0,-38,32,15,0,0,7);c.fill();
+  c.beginPath();c.moveTo(18,-48);c.lineTo(36,-80);c.lineTo(52,-72);c.lineTo(36,-34);c.fill();
+  c.beginPath();c.ellipse(53,-72,14,7,.65,0,7);c.fill();
+  c.beginPath();c.moveTo(42,-82);c.lineTo(44,-93);c.lineTo(50,-82);c.fill();
+  c.strokeStyle=h.d;c.lineWidth=5;c.beginPath();c.moveTo(18,-50);c.quadraticCurveTo(26,-74,38,-82);c.stroke();
+  c.fillStyle='#111';c.beginPath();c.arc(50,-76,1.8,0,7);c.fill();
+  c.translate(0,-bob);
+  leg(-26,0,h.c);leg(12,1.2,h.c);
+  c.translate(0,bob);
+  c.fillStyle=h.silk;c.beginPath();c.roundRect(-8,-52,18,12,3);c.fill();
+  c.fillStyle='#222';c.font='700 9px Outfit,sans-serif';c.textAlign='center';c.fillText(num,1,-43);
+  c.fillStyle=h.silk;c.beginPath();c.ellipse(9,-66,7,9,.3,0,7);c.fill();
+  c.fillStyle='#f1c9a5';c.beginPath();c.arc(15,-80,5,0,7);c.fill();
+  c.fillStyle=h.d;c.beginPath();c.arc(15,-82,5.2,Math.PI,0);c.fill();
+  c.restore();
+}
+
+/* ===== Menu logo + cards ===== */
+const lg=$('logo').getContext('2d');
+function drawLogo(){
+  lg.clearRect(0,0,240,240);
+  const gr=lg.createRadialGradient(120,120,10,120,120,115);gr.addColorStop(0,'#ffd84a');gr.addColorStop(.7,'#ff7a00');gr.addColorStop(1,'#a63f00');
+  lg.fillStyle=gr;lg.beginPath();lg.arc(120,120,112,0,7);lg.fill();
+  lg.lineWidth=6;lg.strokeStyle='#fff4e0';lg.beginPath();lg.arc(120,120,104,0,7);lg.stroke();
+  drawHorse(lg,112,176,1.75,{c:'#3a1a08',d:'#150800',silk:'#ffd84a'},T*14,'1');
+}
+HS.forEach((h,i)=>{
+  const b=document.createElement('button');b.className='card';b.type='button';
+  b.innerHTML=`<canvas width="200" height="130"></canvas><b>${h.n}</b>
+  <small>Speed</small><div class="bar"><i style="width:${(h.s-19)/1.5*100}%"></i></div>
+  <small>Burst</small><div class="bar"><i style="width:${h.b*100}%"></i></div>`;
+  const c=b.querySelector('canvas').getContext('2d');
+  c.fillStyle='#2f7a2a';c.fillRect(0,100,200,30);drawHorse(c,95,112,1.15,h,.9,i+1);
+  b.onclick=()=>{sel=i;mark();save();tone(660,.08)};
+  $('cards').appendChild(b);
+});
+function mark(){[...$('cards').children].forEach((e,i)=>e.classList.toggle('sel',i===sel))}
+
+/* ===== Navigation ===== */
+function show(id){screen=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
+function setDiff(){[...$('seg').children].forEach(b=>b.classList.toggle('on',b.dataset.d===diff))}
+$('play').onclick=()=>{show('select');mark();tone(520,.1)};
+$('setb').onclick=()=>$('modal').classList.add('on');
+$('close').onclick=()=>$('modal').classList.remove('on');
+$('seg').onclick=e=>{if(e.target.dataset.d){diff=e.target.dataset.d;setDiff();save();tone(600,.08)}};
+$('mute').onclick=$('mute2').onclick=()=>{muted=!muted;syncMute()};
+$('back1').onclick=()=>show('menu');
+$('go').onclick=()=>{prepare();show('game')};
+$('quit').onclick=()=>{run++;state='idle';$('count').textContent='';show('menu')};
+$('again').onclick=()=>{prepare();show('game')};
+$('change').onclick=()=>show('select');
+$('tomenu').onclick=()=>show('menu');
+
+/* ===== Race ===== */
+function prepare(){
+  run++;T=0;bt=0;cd=0;state='idle';ptc=[];conf=[];
+  horses=HS.map((h,i)=>({i,d:0,v:0,fin:null,ph:Math.random()*6,wob:Math.random(),sg:0,st:0,dust:0,
+    base:h.s*(i===sel?1:DM[diff]*(.99+Math.random()*.02))}));
+  $('count').textContent='';$('start').style.display='';$('boost').disabled=true;$('boost').classList.remove('ready');hud();
+}
+function say(t){const c=$('count');c.textContent=t;c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop')}
+$('start').onclick=()=>{
+  if(state!=='idle')return;state='count';$('start').style.display='none';const id=++run;
+  const step=n=>{if(id!==run)return;
+    if(n>0){say(n);tone(440,.2);setTimeout(()=>step(n-1),900)}
+    else{say('GO!');tone(880,.45,'square',.08);state='race';$('boost').disabled=false;setTimeout(()=>{if(id===run&&state==='race')$('count').textContent=''},800)}};
+  step(3);
+};
+function doBoost(){
+  if(state!=='race'||bt>0||cd>0)return;
+  bt=2;cd=8;tone(300,.5,'sawtooth',.06,0,1200);
+}
+$('boost').onclick=doBoost;
+addEventListener('keydown',e=>{if(e.code==='Space'&&screen==='game'){e.preventDefault();doBoost()}});
+
+function update(dt){
+  T+=dt;if(bt>0)bt-=dt;if(cd>0)cd-=dt;
+  gal-=dt;if(gal<=0){tone(85,.09,'triangle',.07);gal=.24}
+  horses.forEach(h=>{
+    const P=HS[h.i],me=h.i===sel;
+    if(!h.fin){
+      if(!me){h.st-=dt;if(h.st<=0){h.sg=(Math.random()*1.5-.5)*P.b*1.3;h.st=1.2+Math.random()*1.8}}
+      const tg=me?h.base*(bt>0?1.32:1):h.base*(.975+.05*Math.sin(T*(1.3+h.wob)+h.ph))+h.sg;
+      h.v+=(tg-h.v)*Math.min(1,dt*(1.2+P.b));
+      h.d+=h.v*dt;
+      if(h.d>=LEN){h.d=LEN;h.fin=T}
+    }else h.v*=.985;
+    h.x=SX+Math.min(1,h.d/LEN)*(FX-SX)+(h.fin?Math.min(60,(T-h.fin)*h.v*3):0);
+    h.dust-=dt;if(h.dust<=0&&h.v>3){h.dust=.07;spawn(h.x-18,LT+(h.i+1)*LH-8,'dust');if(me&&bt>0)for(let k=0;k<3;k++)spawn(h.x-30,LT+(h.i+1)*LH-35,'spark')}
+  });
+  const p=horses[sel];off+=p.v*dt*3.2;
+  if(p.fin&&state==='race'){state='end';endT=1.4;if(rank()===1)celebrate()}
+  hud();
+}
+function rank(){return [...horses].sort((a,b)=>b.d-a.d||(a.fin??9e9)-(b.fin??9e9)).findIndex(h=>h.i===sel)+1}
+function hud(){
+  const p=horses[sel]||{d:0};
+  $('hpos').textContent=rank()+'/6';$('hrem').textContent=Math.max(0,Math.ceil(LEN-p.d))+' m';$('htime').textContent=T.toFixed(1)+' s';
+  const ready=state==='race'&&bt<=0&&cd<=0;
+  $('bfill').style.width=(bt>0?100:state==='race'?(1-cd/8)*100:100)+'%';
+  $('blabel').textContent=bt>0?'Boosting!':ready?'Boost ready':state==='race'?'Recharging '+Math.ceil(cd)+'s':'Boost ready';
+  $('boost').classList.toggle('ready',ready);
+}
+function results(){
+  const arr=horses.map(h=>({h,t:h.fin??T+(LEN-h.d)/Math.max(h.v,6)})).sort((a,b)=>a.t-b.t);
+  const r=arr.findIndex(o=>o.h.i===sel)+1;
+  $('rtitle').textContent=r===1?'You win!':['','','2nd place','3rd place'][r]||r+'th place';
+  $('rsub').textContent='Winner: '+HS[arr[0].h.i].n+' on '+diff+' difficulty';
+  $('rlist').innerHTML=arr.map((o,i)=>`<li class="${o.h.i===sel?'me':''}"><span class="num">${i+1}</span><span class="dot" style="background:${HS[o.h.i].c}"></span><b>${HS[o.h.i].n}${o.h.i===sel?' (you)':''}</b><span class="t">${o.t.toFixed(2)} s</span></li>`).join('');
+  if(r!==1){tone(330,.25,'triangle',.08);tone(220,.4,'triangle',.08,.25)}
+  show('results');state='idle';
+}
+
+/* ===== Particles ===== */
+function spawn(x,y,k){
+  if(k==='dust')ptc.push({x,y,vx:-25-Math.random()*25,vy:-8-Math.random()*22,l:.5,m:.5,r:3+Math.random()*3,c:'230,190,120'});
+  else ptc.push({x,y:y+(Math.random()-.5)*20,vx:-60-Math.random()*60,vy:(Math.random()-.5)*40,l:.4,m:.4,r:2.5,c:'255,220,60'});
+}
+function celebrate(){
+  [523,659,784,1047,1319].forEach((f,i)=>tone(f,.3,'square',.07,i*.12));
+  const cs=['#ffc928','#ff7a00','#fff4e0','#ff4d00','#ffe27a'];
+  for(let i=0;i<170;i++)conf.push({x:Math.random()*fx.width,y:-20-Math.random()*fx.height*.5,vx:(Math.random()-.5)*160,vy:120+Math.random()*220,a:Math.random()*6,va:(Math.random()-.5)*10,c:cs[i%5],s:6+Math.random()*7});
+}
+
+/* ===== Render ===== */
+const crowd=[];for(let r=0;r<4;r++)for(let i=0;i<64;i++)crowd.push({x:10+i*15+(r%2)*7,y:52+r*21,c:['#ffc928','#ff7a00','#fff4e0','#ff5a1f','#8a4a1c'][(i*7+r*3)%5],p:Math.random()*6});
+function render(){
+  const sky=g.createLinearGradient(0,0,0,LT);sky.addColorStop(0,'#2a0f04');sky.addColorStop(1,'#7a2d06');
+  g.fillStyle=sky;g.fillRect(0,0,W,LT);
+  g.fillStyle='#3a1a0a';g.beginPath();g.moveTo(0,36);g.lineTo(W,36);g.lineTo(W,LT-8);g.lineTo(0,LT-8);g.fill();
+  g.fillStyle='#ff7a00';g.fillRect(0,0,W,34);
+  g.fillStyle='#2a1000';g.font='20px Bungee,Impact,sans-serif';g.textAlign='center';g.fillText('HORSE RUSH  GRAND STADIUM',W/2,25);
+  const ch=state==='race'||state==='end'?3.5:1;
+  crowd.forEach(p=>{g.fillStyle=p.c;g.beginPath();g.arc(p.x,p.y+Math.sin(T*7+p.p)*ch,5,0,7);g.fill()});
+  g.fillStyle='#ffc928';g.fillRect(0,LT-10,W,6);
+  for(let x=0;x<W;x+=40){g.fillStyle='#fff4e0';g.fillRect(x+4,LT-10,3,10)}
+  for(let i=0;i<6;i++){
+    const y=LT+i*LH;g.fillStyle=i%2?'#2f8a2f':'#379a37';g.fillRect(0,y,W,LH+1);
+    g.fillStyle='rgba(255,255,255,.06)';
+    for(let x=-120-(off%120);x<W;x+=120)g.fillRect(x,y,60,LH+1);
+  }
+  g.strokeStyle='rgba(255,255,255,.65)';g.lineWidth=2;g.setLineDash([18,14]);g.lineDashOffset=off;
+  for(let i=1;i<6;i++){g.beginPath();g.moveTo(0,LT+i*LH);g.lineTo(W,LT+i*LH);g.stroke()}
+  g.setLineDash([]);
+  g.fillStyle='#fff';g.fillRect(SX-6,LT,4,LH*6);
+  for(let r=0;r<12;r++)for(let c=0;c<2;c++){g.fillStyle=(r+c)%2?'#111':'#fff';g.fillRect(FX+c*10,LT+r*LH/2,10,LH/2)}
+  g.fillStyle='#ffc928';g.fillRect(FX+22,LT-10,4,LH*6+10);
+  g.fillStyle='#ffc928';g.font='14px Bungee,Impact,sans-serif';g.fillText('FINISH',FX+10,LT+LH*6+14);
+  g.fillStyle='#1f5a1f';g.fillRect(0,LT+LH*6,W,H);
+  const ph=T*(state==='idle'?3:15);
+  horses.forEach(h=>{
+    const y=LT+(h.i+1)*LH-8;
+    drawHorse(g,h.x??SX,y,.68,HS[h.i],state==='idle'?1:ph+h.i*.7,h.i+1);
+    if(h.i===sel){const x=(h.x??SX)+10;g.fillStyle='#ffc928';g.shadowColor='#ffc928';g.shadowBlur=14;
+      g.beginPath();g.moveTo(x-7,y-76);g.lineTo(x+7,y-76);g.lineTo(x,y-66);g.fill();g.shadowBlur=0;
+      g.font='13px Bungee,sans-serif';g.fillText('YOU',x,y-80)}
+  });
+  ptc.forEach(p=>{g.fillStyle=`rgba(${p.c},${p.l/p.m*.7})`;g.beginPath();g.arc(p.x,p.y,p.r,0,7);g.fill()});
+  if(bt>0){g.fillStyle='rgba(255,200,0,.10)';g.fillRect(0,LT,W,LH*6)}
+}
+function fxResize(){fx.width=innerWidth;fx.height=innerHeight}
+addEventListener('resize',fxResize);fxResize();
+
+/* ===== Main loop ===== */
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(screen==='menu'){T+=dt;drawLogo()}
+  if(screen==='game'||(screen==='results'&&false)){
+    if(state==='race')update(dt);
+    else if(state==='end'){update(dt);endT-=dt;if(endT<=0)results()}
+    else if(state==='count')T+=0;
+    ptc.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.l-=dt});ptc=ptc.filter(p=>p.l>0);
+    render();
+  }
+  fg.clearRect(0,0,fx.width,fx.height);
+  conf.forEach(c=>{c.x+=c.vx*dt;c.y+=c.vy*dt;c.a+=c.va*dt;fg.save();fg.translate(c.x,c.y);fg.rotate(c.a);fg.fillStyle=c.c;fg.fillRect(-c.s/2,-c.s/4,c.s,c.s/2);fg.restore()});
+  conf=conf.filter(c=>c.y<fx.height+30);
+  requestAnimationFrame(loop);
+}
+/* Idle phase counter for the menu animation */
+setDiff();syncMute();prepare();show('menu');
+document.fonts&&document.fonts.ready.then(()=>{});
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
